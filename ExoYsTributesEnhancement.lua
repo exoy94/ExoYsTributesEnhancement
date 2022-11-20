@@ -138,9 +138,6 @@ h5. TributeGameFlowState
 local EM = GetEventManager() 
 
 ETE.name = "ExoYsTributesEnhancement"
-ETE.WM = GetWindowManager()
-
-
 
 --[[ --------------- ]]
 --[[ -- CONSTANTS -- ]]

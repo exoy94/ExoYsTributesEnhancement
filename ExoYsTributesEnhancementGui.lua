@@ -1,8 +1,9 @@
 TributesEnhancement = TributesEnhancement or {}
 
 local ETE = TributesEnhancement
-
 local Lib = LibExoYsUtilities
+
+local WM = GetWindowManager() 
 
 ---------------
 -- Turn Time --
@@ -16,7 +17,7 @@ function ETE.InitializeTurnTimeGui()
 
   local store = ETE.store.turnTime
 
-  local win = ETE.WM:CreateTopLevelWindow( turnTimeGui.name.."Window" )
+  local win = WM:CreateTopLevelWindow( turnTimeGui.name.."Window" )
   win:ClearAnchors()
   win:SetAnchor( BOTTOMRIGHT, GuiRoot, TOPLEFT, store.position.x, store.position.y)
   win:SetHidden(true)
@@ -28,11 +29,11 @@ function ETE.InitializeTurnTimeGui()
   win:SetMovable(true)
 
 
-  local ctrl = ETE.WM:CreateControl( turnTimeGui.name.."Control", win, CT_CONTROL)
+  local ctrl = WM:CreateControl( turnTimeGui.name.."Control", win, CT_CONTROL)
   ctrl:ClearAnchors()
   ctrl:SetAnchor( BOTTOMRIGHT, win, BOTTOMRIGHT, 0, 0)
 
-  local label = ETE.WM:CreateControl( turnTimeGui.name.."Label", ctrl, CT_LABEL)
+  local label = WM:CreateControl( turnTimeGui.name.."Label", ctrl, CT_LABEL)
   label:ClearAnchors()
   label:SetAnchor(BOTTOMRIGHT, ctrl, BOTTOMRIGHT, 0, 0)
   label:SetColor(1,1,1,1)
@@ -56,12 +57,12 @@ function ETE.InitializeTurnTimeGui()
   end
   SetSize( store.size )
 
-  local buttons = ETE.WM:CreateControl( turnTimeGui.name.."Buttons", ctrl, CT_CONTROl)
+  local buttons = WM:CreateControl( turnTimeGui.name.."Buttons", ctrl, CT_CONTROl)
   buttons:ClearAnchors()
   buttons:SetAnchor(BOTTOMLEFT, ctrl, BOTTOMRIGHT, 0, 0)
   buttons:SetHidden(true)
 
-  local up = ETE.WM:CreateControl( turnTimeGui.name.."Up", buttons, CT_BUTTON)
+  local up = WM:CreateControl( turnTimeGui.name.."Up", buttons, CT_BUTTON)
   up:ClearAnchors()
   up:SetAnchor( BOTTOM, buttons, BOTTOMRIGHT, 20, -35 )
   up:SetDimensions( 30, 30 )
@@ -72,7 +73,7 @@ function ETE.InitializeTurnTimeGui()
   up:SetPressedTexture( upTexture.."_down.dds")
   up:SetHandler( "OnClicked", function() ChangeSize(true) end)
 
-  local down = ETE.WM:CreateControl( turnTimeGui.name.."Down", buttons, CT_BUTTON)
+  local down = WM:CreateControl( turnTimeGui.name.."Down", buttons, CT_BUTTON)
   down:ClearAnchors()
   down:SetAnchor( BOTTOM, buttons, BOTTOMRIGHT, 20, -20 )
   down:SetDimensions( 30, 30 )
@@ -89,7 +90,7 @@ function ETE.InitializeTurnTimeGui()
   end
 
   turnTimeGui.locked = true
-  local lock = ETE.WM:CreateControl( turnTimeGui.name.."Lock", buttons, CT_BUTTON)
+  local lock = WM:CreateControl( turnTimeGui.name.."Lock", buttons, CT_BUTTON)
   lock:ClearAnchors()
   lock:SetAnchor( BOTTOM, buttons, BOTTOMRIGHT, 25, 0 )
   lock:SetDimensions( 20, 20 )
@@ -148,7 +149,7 @@ function ETE.CreateMatchDataGui()
   local guiName = ETE.name.."MatchDataGui"
   local store = ETE.store.matchData
 
-  local win = ETE.WM:CreateTopLevelWindow( guiName.."Window" )
+  local win = WM:CreateTopLevelWindow( guiName.."Window" )
   win:ClearAnchors()
   win:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT, store.position.x, store.position.y)
   win:SetMouseEnabled(false)
@@ -161,16 +162,16 @@ function ETE.CreateMatchDataGui()
       store.position.y = win:GetTop()
     end )
 
-  local ctrl = ETE.WM:CreateControl( guiName.."Control", win, CT_CONTROL )
+  local ctrl = WM:CreateControl( guiName.."Control", win, CT_CONTROL )
   ctrl:ClearAnchors()
   ctrl:SetAnchor(TOPLEFT, win, TOPLEFT, 0, 0)
 
-  local label = ETE.WM:CreateControl( guiName.."Label", ctrl, CT_LABEL )
+  local label = WM:CreateControl( guiName.."Label", ctrl, CT_LABEL )
   label:ClearAnchors()
   label:SetAnchor( TOPLEFT, ctrl, TOPLEFT, 0, 0 )
   label:SetColor(1,1,1,1)
 
-  local whisper = ETE.WM:CreateControl( guiName.."whisper", ctrl, CT_BUTTON )
+  local whisper = WM:CreateControl( guiName.."whisper", ctrl, CT_BUTTON )
   whisper:ClearAnchors()
   whisper:SetAnchor( TOPRIGHT, ctrl, TOPLEFT, 0, 0 )
   whisper:SetDimensions( 30, 30 )
@@ -197,7 +198,7 @@ local function GetHorizontalPosition( position )
 end
 
 local function CreateLabel(name, parent, offsetX, offsetY)
-  local label = ETE.WM:CreateControl( name, parent, CT_LABEL )
+  local label = WM:CreateControl( name, parent, CT_LABEL )
   label:ClearAnchors()
   label:SetAnchor( TOPLEFT, ctrl, TOPLEFT, offsetX or 0, offsetY or 0 )
   label:SetColor(1,1,1,1)
@@ -210,7 +211,7 @@ local function AddEntry( charId ) --TODO naming
   local entry = {}
   local guiName = tostring(charId)
 
-  entry.ctrl = ETE.WM:CreateControl( guiName.."Control", ETE.statsGui.win, CT_CONTROL )
+  entry.ctrl = WM:CreateControl( guiName.."Control", ETE.statsGui.win, CT_CONTROL )
 
   entry.name = CreateLabel(guiName.."name", entry.ctrl, -50)
 
@@ -248,7 +249,7 @@ function ETE.CreateStatsGui() --TODO naming
   local guiName = ETE.name.."StatsGui"
   --local store = ETE.store.turnTime
 
-  local win = ETE.WM:CreateTopLevelWindow( guiName.."Window" )
+  local win = WM:CreateTopLevelWindow( guiName.."Window" )
   win:ClearAnchors()
   --win:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT, store.position.x, store.position.y)
   win:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT, 600, 600)
@@ -263,7 +264,7 @@ function ETE.CreateStatsGui() --TODO naming
   --  end )
 
 
-  local ctrl = ETE.WM:CreateControl( guiName.."Control", win, CT_CONTROL )
+  local ctrl = WM:CreateControl( guiName.."Control", win, CT_CONTROL )
   ctrl:ClearAnchors()
   ctrl:SetAnchor(TOPLEFT, win, TOPLEFT, 0, 0)
 
@@ -338,7 +339,7 @@ end
 function ETE.InitializeStatsGui()
   if StatsGui.initialized then return end
 
-  local win = ETE.WM:CreateTopLevelWindow( StatsGui.name.."Window")
+  local win = WM:CreateTopLevelWindow( StatsGui.name.."Window")
   win:ClearAnchors()
   win:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT, 400, 400)
   win:SetHidden(true)
@@ -347,12 +348,12 @@ function ETE.InitializeStatsGui()
   --local frag = ZO_HUDFadeSceneFragment:New( win )
   --StatsGui.frag = frag
 
-  local ctrl = ETE.WM:CreateControl( StatsGui.name.."Control", win, CT_CONTROL)
+  local ctrl = WM:CreateControl( StatsGui.name.."Control", win, CT_CONTROL)
   ctrl:ClearAnchors()
   ctrl:SetAnchor(TOPLEFT, win, TOPLEFT, 0, 0)
   StatsGui.ctrl = ctrl
 
-  local back = ETE.WM:CreateControl( StatsGui.name.."Back", ctrl, CT_BACKDROP)
+  local back = WM:CreateControl( StatsGui.name.."Back", ctrl, CT_BACKDROP)
   back:ClearAnchors()
   back:SetAnchor( TOPLEFT, ctrl, TOPLEFT, 0, 0)
   back:SetDimensions( 830, 230)
@@ -412,7 +413,7 @@ function ETE.InitializeStatsGui()
 
     local width, height = parent:GetDimensions()
 
-    local button = ETE.WM:CreateControl( "TestButton", parent, CT_BUTTON )
+    local button = WM:CreateControl( "TestButton", parent, CT_BUTTON )
     button:ClearAnchors()
     button:SetAnchor(CENTER, parent, CENTER, -width, 0)
     button:SetDimensions( width, height )
