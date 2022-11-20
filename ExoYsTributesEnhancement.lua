@@ -249,6 +249,7 @@ local function IsPlayerTurn()
 end
 
 
+
 --[[ ---------------- ]]
 --[[ -- Automation -- ]]
 --[[ ---------------- ]]
@@ -256,11 +257,11 @@ end
 
 local defaultPlayerStatus = PLAYER_STATUS_ONLINE
 
-local function CreateSafeEnvironment()
-  -- early out
+local function SetOnlineStatus() 
+  -- early out when there are no match data available
   if not IsMatchDataInitialized() then return end
 
-  -- player Status
+  defaultPlayerStatus = GetPlayerStatus()
   local store = ETE.store.automation
   local matchType = matchData.matchType
 
@@ -268,14 +269,14 @@ local function CreateSafeEnvironment()
     SelectPlayerStatus( store.changePlayerStatus[matchType].status )
     Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", store.changePlayerStatus[matchType].status}, {" (", ")"} )
   end
-
 end
 
-
-local function RevertSafeEnvironmentChanges()
+local function RevertOnlineStatus() 
   SelectPlayerStatus( defaultPlayerStatus )
   Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", defaultPlayerStatus}, {" (", ")"} )
 end
+
+
 
 ----
 
@@ -424,8 +425,7 @@ local function OnGameFlowStateChange( _, flowState )
   FLOW_STATE = flowState
   if flowState == TRIBUTE_GAME_FLOW_STATE_INTRO then
     InitializeMatchData()
-    defaultPlayerStatus = GetPlayerStatus()
-    CreateSafeEnvironment()
+    SetOnlineStatus() 
   elseif flowState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
     --if ETE.store.automation.maxChatAtGameStart then
     --  MaximizeChat()
@@ -462,7 +462,7 @@ local function OnGameFlowStateChange( _, flowState )
 
   elseif flowState == TRIBUTE_GAME_FLOW_STATE_INACTIVE then
     ClearMatchData()
-    RevertSafeEnvironmentChanges()
+    RevertOnlineStatus()
   end
 end
 
