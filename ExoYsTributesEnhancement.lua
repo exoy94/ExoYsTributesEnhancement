@@ -1,7 +1,6 @@
 TributesEnhancement = TributesEnhancement or {}
 
 local ETE = TributesEnhancement
-
 local Lib = LibExoYsUtilities
 
 --[[
@@ -136,8 +135,9 @@ h5. TributeGameFlowState
 --[[ -- variables -- ]]
 --[[ --------------- ]]
 
+local EM = GetEventManager() 
+
 ETE.name = "ExoYsTributesEnhancement"
-ETE.EM = GetEventManager()
 ETE.WM = GetWindowManager()
 
 
@@ -197,7 +197,7 @@ local FEATURES = { update = {} }
 
 local function RegisterUpdate(id, callback, interval )
   if not interval then interval = 100 end
-  ETE.EM:RegisterForUpdate(ETE.name.."Update"..id, interval, callback)
+  EM:RegisterForUpdate(ETE.name.."Update"..id, interval, callback)
   FEATURES.update[id] = true
 end
 
@@ -437,7 +437,7 @@ local function OnGameFlowStateChange( _, flowState )
     matchData.turnStart = GetGameTimeMilliseconds()
     matchData.perspective = GetActiveTributePlayerPerspective()
 
-    ETE.EM:RegisterForUpdate(ETE.name.."Update", 100, ETE.OnUpdate)
+    EM:RegisterForUpdate(ETE.name.."Update", 100, ETE.OnUpdate)
     ETE.matchDataGui.win:SetHidden(false)
 
     if matchData.matchType == TRIBUTE_MATCH_TYPE_CASUAL or matchData.matchType == TRIBUTE_MATCH_TYPE_COMPETITIVE then
@@ -450,7 +450,7 @@ local function OnGameFlowStateChange( _, flowState )
   elseif flowState == TRIBUTE_GAME_FLOW_STATE_GAME_OVER then
 
     ETE.matchDataGui.win:SetHidden(true)
-    ETE.EM:UnregisterForUpdate(ETE.name.."Update")
+    EM:UnregisterForUpdate(ETE.name.."Update")
 
     matchData.matchDuration = GetGameTimeMilliseconds() - matchData.matchStart --TODO new or old?
     PostMatchProcess()
@@ -459,7 +459,7 @@ local function OnGameFlowStateChange( _, flowState )
 
     -- Unregister all Updates
     for update, _ in pairs( FEATURES.update) do
-      ETE.EM:UnregisterForUpdate(ETE.name.."Update"..update)
+      EM:UnregisterForUpdate(ETE.name.."Update"..update)
     end
     FEATURES.update = {}
 
@@ -621,10 +621,10 @@ local function Initialize()
 
 
 
-  ETE.EM:RegisterForEvent(ETE.name.."PlayerTurnStart", EVENT_TRIBUTE_PLAYER_TURN_STARTED, OnPlayerTurnStart)
-  ETE.EM:RegisterForEvent(ETE.name.."FlowStateChange", EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE, OnGameFlowStateChange)
+  EM:RegisterForEvent(ETE.name.."PlayerTurnStart", EVENT_TRIBUTE_PLAYER_TURN_STARTED, OnPlayerTurnStart)
+  EM:RegisterForEvent(ETE.name.."FlowStateChange", EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE, OnGameFlowStateChange)
 
-  ETE.EM:RegisterForEvent(ETE.name.."ActivityFinterStatus", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, OnActivityFinderStatusUpdate)
+  EM:RegisterForEvent(ETE.name.."ActivityFinterStatus", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, OnActivityFinderStatusUpdate)
 
   ETE.CreateMenu()
 
@@ -646,11 +646,11 @@ ZO_CreateStringId("SI_BINDING_NAME_ETE_TOGGLE_STATS_WINDOW", "Toggle Stats Windo
 local function OnAddonLoaded(_, addonName)
   if addonName == ETE.name then
     Initialize()
-    ETE.EM:UnregisterForEvent(ETE.name, EVENT_ADD_ON_LOADED)
+    EM:UnregisterForEvent(ETE.name, EVENT_ADD_ON_LOADED)
   end
 end
 
-ETE.EM:RegisterForEvent(ETE.name, EVENT_ADD_ON_LOADED, OnAddonLoaded)
+EM:RegisterForEvent(ETE.name, EVENT_ADD_ON_LOADED, OnAddonLoaded)
 
 
 function ETE.TogglePositionFix()
