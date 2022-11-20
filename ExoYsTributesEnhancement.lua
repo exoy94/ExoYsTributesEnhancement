@@ -14,25 +14,11 @@ TODO
 
 IsFriend(string charOrDisplayName)
 
-AddIgnore(@)
-RemoveIgnore(@)
-SetSessionIgnore(string userName, boolean isIgnoredThisSession)
-ClearSessionIgnores()
-GetIgnoredInfo(number index) -> Returns: string displayName, string note
-GetNumIgnored()
-IsIgnored(string charOrDisplayName)
-SetIgnoreNote(number ignoreIndex, string note)
 
 KEYBOARD_CHAT_SYSTEM:Maximize()
 else
 KEYBOARD_CHAT_SYSTEM:Minimize()
 *GAMEPAD_CHAT...
-
-+ positioning not correct (example jessi's bildschirm)
-+ aktuell keine Zeitbeschränkung gegen Freund und NPC's...?!
-+ erster Zug
-+ etwas mehr als 90 sek (einmal 94 und einmal 96)
-+ dauer, wie lange das spiel schon geht
 
 * GetNumPatronsFavoringPlayerPerspective(*[TributePlayerPerspective|#TributePlayerPerspective]* _playerPerspective_)
 ** _Returns:_ *integer* _numPatronsFavored_
@@ -113,9 +99,9 @@ LEADERBOARD_LIST_MANAGER:GetMasterList()
 
 ]]
 
-----------------
--- References --
-----------------
+--[[ ---------------- ]]
+--[[ -- References -- ]]
+--[[ ---------------- ]]
 --[[
 h5. TributePlayerPerspective
 * TRIBUTE_PLAYER_PERSPECTIVE_SELF      -- 0
@@ -146,17 +132,19 @@ h5. TributeGameFlowState
 
 
 
----------------
--- variables --
----------------
+--[[ --------------- ]]
+--[[ -- variables -- ]]
+--[[ --------------- ]]
 
 ETE.name = "ExoYsTributesEnhancement"
 ETE.EM = GetEventManager()
 ETE.WM = GetWindowManager()
 
----------------------
--- local variables --
----------------------
+
+
+--[[ --------------- ]]
+--[[ -- CONSTANTS -- ]]
+--[[ --------------- ]]
 
 local OUTCOME_UNKOWN = 0
 local OUTCOME_VICTORY = 1
@@ -168,9 +156,11 @@ local MATCH_PENDING = false
 
 local IGNORE_NOTE = "TributesEnhancement Temporary Ignore"
 
---------------------
--- loockup tables --
---------------------
+
+
+--[[ -------------------- ]]
+--[[ -- loockup tables -- ]]
+--[[ -------------------- ]]
 
 local matchTypeOrder = {
     TRIBUTE_MATCH_TYPE_CLIENT,          -- 3
@@ -184,14 +174,14 @@ function ETE.GetMatchTypeOrder()
 end
 
 local matchTypeName = {
-  [TRIBUTE_MATCH_TYPE_CASUAL] = ETE_MATCH_TYPE_CASUAL,       -- 4
-  [TRIBUTE_MATCH_TYPE_CLIENT] = ETE_MATCH_TYPE_CLIENT,          -- 3
+  [TRIBUTE_MATCH_TYPE_CASUAL] = ETE_MATCH_TYPE_CASUAL,            -- 4
+  [TRIBUTE_MATCH_TYPE_CLIENT] = ETE_MATCH_TYPE_CLIENT,            -- 3
   [TRIBUTE_MATCH_TYPE_COMPETITIVE] = ETE_MATCH_TYPE_COMPETITIVE,  -- 1
-  [TRIBUTE_MATCH_TYPE_PRIVATE] = ETE_MATCH_TYPE_PRIVATE,    -- 2
+  [TRIBUTE_MATCH_TYPE_PRIVATE] = ETE_MATCH_TYPE_PRIVATE,          -- 2
 }
 
 function ETE.GetMatchTypeName( matchType )
-  return matchTypeName[matchType]
+  return matchTypeName[matchType]a
 end
 
 local outcomeDesignation = {
@@ -203,8 +193,6 @@ function ETE.GetOutcomeDesignation( outcome )
   return outcomeDesignation[outcome]
 end
 
---
-
 local FEATURES = { update = {} }
 
 local function RegisterUpdate(id, callback, interval )
@@ -212,9 +200,12 @@ local function RegisterUpdate(id, callback, interval )
   ETE.EM:RegisterForUpdate(ETE.name.."Update"..id, interval, callback)
   FEATURES.update[id] = true
 end
-------------------------
--- Match Data Manager --
-------------------------
+
+
+
+--[[ ------------------------ ]]
+--[[ -- Match Data Manager -- ]]
+--[[ ------------------------ ]]
 
 local matchData = {}
 
@@ -259,65 +250,17 @@ end
 local function IsPlayerTurn()
   return matchData.perspective == TRIBUTE_PLAYER_PERSPECTIVE_SELF
 end
-----
---[[IsFriend(string charOrDisplayName)
 
-AddIgnore(@)
-RemoveIgnore(@)
-SetSessionIgnore(string userName, boolean isIgnoredThisSession)
-ClearSessionIgnores()
-GetIgnoredInfo(number index) -> Returns: string displayName, string note
-GetNumIgnored()
-IsIgnored(string charOrDisplayName)
-SetIgnoreNote(number ignoreIndex, string note)]]
 
-----------------
--- Safe Space --
-----------------
+--[[ ---------------- ]]
+--[[ -- Automation -- ]]
+--[[ ---------------- ]]
 
-local SafeSpace = { }
-local Automation = { }
-
---[[function SafeSpace.AddIgnore( displayName )
-  -- TODO Menu Setting
-  if IsFriend(displayName) then
-    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {displayName, " is friend"} )
-    return
-  end
-  if IsIgnored(displayName) then
-    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {displayName, " is already igored"} )
-    return end
-  AddIgnore(displayName)
-  Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {displayName, " added to ignore list"} )
-  for i=1,GetNumIgnored()  do
-    local name,_ = GetIgnoredInfo()
-    if name == displayName then
-      SetIgnoreNote(i, IGNORE_NOTE)
-      Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Ignore note set for ", displayName} )
-    end
-  end
-end
-
-local function RemoveTemporaryIgnoreEntries( )
-  local removeList = {}
-  -- check everybody on ingame ignore list for a specific note and remember the names
-  for i=1,GetNumIgnored() do
-    local name, note = GetIgnoredInfo(i)
-    if note == IGNORE_NOTE then
-      table.insert(removeList, name)
-    end
-  end
-  -- remove everybody from ingame ignore list identified by previous loop
-  for _, name in pairs(removeList) do
-    RemoveIgnore(name)
-    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {displayName, " removed from ignore  list"} )
-  end
-
-end]]
 
 local defaultPlayerStatus = PLAYER_STATUS_ONLINE
 
 local function CreateSafeEnvironment()
+  -- early out
   if not IsMatchDataInitialized() then return end
 
   -- player Status
@@ -329,15 +272,12 @@ local function CreateSafeEnvironment()
     Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", store.changePlayerStatus[matchType].status}, {" (", ")"} )
   end
 
-  --
-
 end
 
 
 local function RevertSafeEnvironmentChanges()
   SelectPlayerStatus( defaultPlayerStatus )
   Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", defaultPlayerStatus}, {" (", ")"} )
-  --RemoveTemporaryIgnoreEntries( )
 end
 
 ----
@@ -441,9 +381,10 @@ local function PostMatchProcess( )
 end
 
 
----------------------------
--- Turn Time Gui Handler --
----------------------------
+
+--[[ --------------------------- ]]
+--[[ -- Turn Time Gui Handler -- ]]
+--[[ --------------------------- ]]
 
 local function DecideTurnTimeGuiVisibility( setValue )
   local show = true
@@ -466,9 +407,10 @@ local function OnUpdateTurnTimeGui()
 end
 
 
----------------------
--- Event Callbacks --
----------------------
+
+--[[ --------------------- ]]
+--[[ -- Event Callbacks -- ]]
+--[[ --------------------- ]]
 
 --TODO WARNING Gamepad mode (GAMEPAD_CHAT)
 local function MaximizeChat()
@@ -594,11 +536,9 @@ end
 
 
 
-
-
-----------------
--- Initialize --
-----------------
+--[[ ---------------- ]]
+--[[ -- Initialize -- ]]
+--[[ ---------------- ]]
 
 --local functions for initialization
 local function ValidateCharacterInfo(store, player)
