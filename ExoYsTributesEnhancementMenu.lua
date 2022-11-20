@@ -40,7 +40,7 @@ local function GetTurnTimeMenu()
 
   return  {
     type = "submenu",
-    name = Lib.AddIconToString( "Turn Helper", "esoui/art/icons/achievement_els_soaring_timeflow.dds", 36, true),
+    name = Lib.AddIconToString( "Turn Helper", "esoui/art/icons/achievement_els_soaring_timeflow.dds", 36, "front"),
     controls = controls,
   }
 end
@@ -79,6 +79,30 @@ local function GetAutomationMenu()
     setFunc = function(value)
       store.delay = value
     end,
+  })
+
+  table.insert(controls, {type="divider"})
+
+  table.insert( controls, {
+    type = "checkbox",
+    name = "Sound Alert",
+    getFunc = function() return store["enableSound"] end,
+    setFunc = function(bool)
+      store["enableSound"] = bool
+    end,
+  })
+
+  table.insert( controls, {
+    type = "slider",
+    name = "Volume",
+    min = 1,
+    max = 10,
+    step = 1,
+    getFunc = function() return store.volume end,
+    setFunc = function(value)
+      store.volumey = value
+    end,
+    --wdith = "half",
   })
 
   --[[table.insert( controls, { type = "divider" })
@@ -154,7 +178,7 @@ local function GetAutomationMenu()
 
   return  {
     type = "submenu",
-    name = Lib.AddIconToString( "Automation", "esoui/art/icons/store_orsiniumdlc_solopve.dds", 36, true),
+    name = Lib.AddIconToString( "Automation", "esoui/art/icons/store_orsiniumdlc_solopve.dds", 36, "front"),
     controls = controls,
   }
 end

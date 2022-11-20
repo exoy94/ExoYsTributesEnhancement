@@ -131,11 +131,13 @@ h5. TributeGameFlowState
 
 
 
---[[ --------------- ]]
---[[ -- variables -- ]]
---[[ --------------- ]]
+--[[ ------------ ]]
+--[[ -- Locals -- ]]
+--[[ ------------ ]]
 
 local EM = GetEventManager() 
+
+local MATCH_PENDING = false
 
 ETE.name = "ExoYsTributesEnhancement"
 
@@ -178,7 +180,7 @@ local matchTypeName = {
 }
 
 function ETE.GetMatchTypeName( matchType )
-  return matchTypeName[matchType]a
+  return matchTypeName[matchType]
 end
 
 local outcomeDesignation = {
@@ -250,10 +252,9 @@ end
 
 
 
---[[ ---------------- ]]
---[[ -- Automation -- ]]
---[[ ---------------- ]]
-
+--[[ ------------------------------- ]]
+--[[ -- Automation: Player Status -- ]]
+--[[ ------------------------------- ]]
 
 local defaultPlayerStatus = PLAYER_STATUS_ONLINE
 
@@ -278,7 +279,62 @@ end
 
 
 
-----
+--[[ ----------------------------- ]]
+--[[ -- Automation: Ready Check -- ]]
+--[[ ----------------------------- ]]
+
+local isMatchPending = false
+
+local function SetPendingStatus( status, info ) 
+  isMatchPending = status
+  Lib.DebugMsg(ETE.store.dev, 'ETE-Dev', {"Pending Status", status, info}, {": ", " (", ")"} )
+  --zo_strformat('Pending Status: <<1>> ()', tostring(status)) )
+end
+
+
+local function LFG_ReadyCheck( lfgActivity )
+  local tributeActivity = {
+    [LFG_ACTIVITY_TRIBUTE_CASUAL] = ETE_MATCH_TYPE_CASUAL,
+    [LFG_ACTIVITY_TRIBUTE_COMPETITIVE] = ETE_MATCH_TYPE_COMPETITIVE
+  }
+
+  if not tributeActivity[lfgActivity] then return end
+
+  SetPendingStatus(true, "ready check")
+
+  Lib.DebugMsg( ETE.store.debug, "ETE", {"ToT Match found", tributeActivity[lfgActivity]}, {" (",")"} )
+
+  local store = ETE.store.automation
+
+  if ETE.store.automation[lfgActivity] then
+    Lib.DebugMsg( ETE.store.debug, "ETE", zo_strformat("Autoaccept in <<1>>s", ETE.store.automation["delay"]) )
+    zo_callLater(function() AcceptLFGReadyCheckNotification() end, ETE.store.automation["delay"]*1000)
+  end
+
+  if store["enableSound"] then
+    for i=1,store["volume"] do
+      PlaySound("EMPEROR_CORONATED_EBONHEART")
+    end
+  end
+end
+
+local function OnActivityFinderStatusUpdate(_, finderStatus)
+  if finderStatus == ACTIVITY_FINDER_STATUS_NONE then
+    SetPendingStatus(false, "finder status none")
+  elseif finderStatus == ACTIVITY_FINDER_STATUS_READY_CHECK then
+    if isMatchPending then return end
+    LFG_ReadyCheck( GetLFGReadyCheckActivityType() )
+  end
+end
+
+
+local function InitializeReadyCheckAutomation() 
+  EM:RegisterForEvent(ETE.name.."ActivityFinterStatus", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, OnActivityFinderStatusUpdate)
+  ZO_PostHook("AcceptLFGReadyCheckNotification", function() SetPendingStatus(false, "accept") end)
+  ZO_PostHook("DeclineLFGReadyCheckNotification", function() SetPendingStatus(false, "decline") end)
+end
+
+--------------------------
 
 local function UpdateMatchDataGui()
   local currentTurnDuration = GetGameTimeMilliseconds() - matchData.turnStart
@@ -500,36 +556,7 @@ end
 
 
 
-local function LFG_ReadyCheck( lfgActivity )
-    local tributeActivity = {
-      [LFG_ACTIVITY_TRIBUTE_CASUAL] = ETE_MATCH_TYPE_CASUAL,
-      [LFG_ACTIVITY_TRIBUTE_COMPETITIVE] = ETE_MATCH_TYPE_COMPETITIVE
-    }
 
-    if not tributeActivity[lfgActivity] then return end
-
-    MATCH_PENDING = true
-
-    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"ToT Match found", tributeActivity[lfgActivity]}, {" (",")"} )
-
-    if ETE.store.automation[lfgActivity] then
-      Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", zo_strformat("Autoaccept in <<1>>s", ETE.store.automation["delay"]) )
-      zo_callLater(function() AcceptLFGReadyCheckNotification() end, ETE.store.automation["delay"]*1000)
-    end
-
-    --  zo_removeCallLater( callbackId )
-end
-
-local function OnActivityFinderStatusUpdate(_, finderStatus)
-
-  if finderStatus == ACTIVITY_FINDER_STATUS_NONE then
-    MATCH_PENDING = false
-  elseif finderStatus == ACTIVITY_FINDER_STATUS_READY_CHECK then
-    if MATCH_PENDING then return end
-    LFG_ReadyCheck( GetLFGReadyCheckActivityType() )
-  end
-
-end
 
 
 
@@ -561,6 +588,8 @@ local function GetDefaults()
       [LFG_ACTIVITY_TRIBUTE_CASUAL] = true,
       [LFG_ACTIVITY_TRIBUTE_COMPETITIVE] = true,
       ["delay"] = 5,
+      ["enableSound"] = true,
+      ["volume"] = 5,
       --["maxChatAtGameStart"] = true,
       --["maxChatAtOpponentTurnStart"] = true,
       --["minChatAtPlayerTurnStart"] = true,
@@ -621,17 +650,11 @@ local function Initialize()
   EM:RegisterForEvent(ETE.name.."PlayerTurnStart", EVENT_TRIBUTE_PLAYER_TURN_STARTED, OnPlayerTurnStart)
   EM:RegisterForEvent(ETE.name.."FlowStateChange", EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE, OnGameFlowStateChange)
 
-  EM:RegisterForEvent(ETE.name.."ActivityFinterStatus", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, OnActivityFinderStatusUpdate)
+  
 
   ETE.CreateMenu()
 
-  ZO_PostHook("AcceptLFGReadyCheckNotification", function()
-    MATCH_PENDING = false
-  end)
-
-  ZO_PostHook("DeclineLFGReadyCheckNotification", function()
-    MATCH_PENDING = false
-  end)
+  InitializeReadyCheckAutomation()
 
 
 
