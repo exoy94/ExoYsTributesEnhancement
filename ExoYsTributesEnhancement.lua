@@ -4,6 +4,29 @@ local ETE = TributesEnhancement
 
 local Lib = LibExoYsUtilities
 
+--[[ Graveyard ]]
+
+  --[[ TODO
+whisper:SetHandler( "OnClicked", function( )
+    if GetTributeMatchType() == TRIBUTE_MATCH_TYPE_CLIENT then return end
+    local opponentName, opponentType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
+    if not opponentType == TRIBUTE_PLAYER_TYPE_REMOTE_PLAYER then return end
+    StartChatInput("", CHAT_CHANNEL_WHISPER, opponentName)
+  end)
+]]
+
+--[[IsFriend(string charOrDisplayName)
+
+AddIgnore(@)
+RemoveIgnore(@)
+SetSessionIgnore(string userName, boolean isIgnoredThisSession)
+ClearSessionIgnores()
+GetIgnoredInfo(number index) -> Returns: string displayName, string note
+GetNumIgnored()
+IsIgnored(string charOrDisplayName)
+SetIgnoreNote(number ignoreIndex, string note)]]
+
+
 --[[
 Sound:
 music still audible
@@ -150,27 +173,36 @@ h5. TributeGameFlowState
 -- variables --
 ---------------
 
-ETE.name = "ExoYsTributesEnhancement"
-ETE.EM = GetEventManager()
+
+EM = GetEventManager()
 ETE.WM = GetWindowManager()
 
----------------------
--- local variables --
----------------------
+
+
+--[[ --------------- ]]
+--[[ -- variables -- ]]
+--[[ --------------- ]]
+
+ETE.name = "ExoYsTributesEnhancement"
+local EM = GetEventManager() 
+local FLOW_STATE = 0
+local MATCH_PENDING = false 
+local FEATURES = { update = {} }
+local IGNORE_NOTE = "TributesEnhancement Temporary Ignore"
+
+--[[ ---------------------- ]]
+--[[ -- custom constants -- ]]
+--[[ ---------------------- ]]
 
 local OUTCOME_UNKOWN = 0
 local OUTCOME_VICTORY = 1
 local OUTCOME_DEFEAT = 2
 local OUTCOME_OMITTED = 3
 
-local FLOW_STATE = 0
-local MATCH_PENDING = false
 
-local IGNORE_NOTE = "TributesEnhancement Temporary Ignore"
-
---------------------
--- loockup tables --
---------------------
+--[[ ------------------- ]]
+--[[ -- lookup tables -- ]]
+--[[ ------------------- ]]
 
 local matchTypeOrder = {
     TRIBUTE_MATCH_TYPE_CLIENT,          -- 3
@@ -178,10 +210,11 @@ local matchTypeOrder = {
     TRIBUTE_MATCH_TYPE_CASUAL,          -- 4
     TRIBUTE_MATCH_TYPE_COMPETITIVE      -- 1
 }
-
+ 
 function ETE.GetMatchTypeOrder()
   return matchTypeOrder
 end
+
 
 local matchTypeName = {
   [TRIBUTE_MATCH_TYPE_CASUAL] = ETE_MATCH_TYPE_CASUAL,       -- 4
@@ -194,6 +227,7 @@ function ETE.GetMatchTypeName( matchType )
   return matchTypeName[matchType]
 end
 
+
 local outcomeDesignation = {
   [OUTCOME_VICTORY] = ETE_OUTCOME_VICTORY,
   [OUTCOME_DEFEAT] = ETE_OUTCOME_DEFEAT,
@@ -203,36 +237,47 @@ function ETE.GetOutcomeDesignation( outcome )
   return outcomeDesignation[outcome]
 end
 
---
 
-local FEATURES = { update = {} }
 
+
+--TODO Move function 
 local function RegisterUpdate(id, callback, interval )
   if not interval then interval = 100 end
-  ETE.EM:RegisterForUpdate(ETE.name.."Update"..id, interval, callback)
+  EM:RegisterForUpdate(ETE.name.."Update"..id, interval, callback)
   FEATURES.update[id] = true
 end
-------------------------
--- Match Data Manager --
-------------------------
+
+function ETE.TogglePositionFix()
+  local setting = ETE.store.fixed
+  if setting then ETE.UnlockGui() else ETE.LockGui() end
+  ETE.store.fixed = not setting
+end
+
+SLASH_COMMANDS["/hourglass"] = ETE.TogglePositionFix
+
+--[[ --------------- ]]
+--[[ -- utilities -- ]]
+--[[ --------------- ]]
+
+local function IsPlayerTurn()
+  return matchData.perspective == TRIBUTE_PLAYER_PERSPECTIVE_SELF
+end
+
+
+--[[ ---------------- ]]
+--[[ -- match data -- ]]
+--[[ ---------------- ]]
 
 local matchData = {}
 
+
+local function InitPlayerOpponentTable()
+  return { [TRIBUTE_PLAYER_PERSPECTIVE_SELF] = 0, [TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT] = 0, }
+end
+
+
 local function InitializeMatchData()
---[[ TODO
-whisper:SetHandler( "OnClicked", function( )
-    if GetTributeMatchType() == TRIBUTE_MATCH_TYPE_CLIENT then return end
-    local opponentName, opponentType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
-    if not opponentType == TRIBUTE_PLAYER_TYPE_REMOTE_PLAYER then return end
-    StartChatInput("", CHAT_CHANNEL_WHISPER, opponentName)
-  end)
-]]
-  local function InitPlayerOpponentTable()
-    return { [TRIBUTE_PLAYER_PERSPECTIVE_SELF] = 0, [TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT] = 0, }
-  end
-
   local opponentName, opponentType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
-
   matchData = {
     matchType = GetTributeMatchType(),
     opponentName = opponentName,
@@ -248,28 +293,16 @@ whisper:SetHandler( "OnClicked", function( )
     }
 end
 
+
 local function IsMatchDataInitialized()
   return not ZO_IsTableEmpty(matchData)
 end
+
 
 local function ClearMatchData()
   matchData = {}
 end
 
-local function IsPlayerTurn()
-  return matchData.perspective == TRIBUTE_PLAYER_PERSPECTIVE_SELF
-end
-----
---[[IsFriend(string charOrDisplayName)
-
-AddIgnore(@)
-RemoveIgnore(@)
-SetSessionIgnore(string userName, boolean isIgnoredThisSession)
-ClearSessionIgnores()
-GetIgnoredInfo(number index) -> Returns: string displayName, string note
-GetNumIgnored()
-IsIgnored(string charOrDisplayName)
-SetIgnoreNote(number ignoreIndex, string note)]]
 
 ----------------
 -- Safe Space --
@@ -315,7 +348,13 @@ local function RemoveTemporaryIgnoreEntries( )
 
 end]]
 
+-- player online status
+
 local defaultPlayerStatus = PLAYER_STATUS_ONLINE
+
+
+
+
 
 local function CreateSafeEnvironment()
   if not IsMatchDataInitialized() then return end
@@ -328,8 +367,6 @@ local function CreateSafeEnvironment()
     SelectPlayerStatus( store.changePlayerStatus[matchType].status )
     Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", store.changePlayerStatus[matchType].status}, {" (", ")"} )
   end
-
-  --
 
 end
 
@@ -495,7 +532,7 @@ local function OnGameFlowStateChange( _, flowState )
     matchData.turnStart = GetGameTimeMilliseconds()
     matchData.perspective = GetActiveTributePlayerPerspective()
 
-    ETE.EM:RegisterForUpdate(ETE.name.."Update", 100, ETE.OnUpdate)
+    EM:RegisterForUpdate(ETE.name.."Update", 100, ETE.OnUpdate)
     ETE.matchDataGui.win:SetHidden(false)
 
     if matchData.matchType == TRIBUTE_MATCH_TYPE_CASUAL or matchData.matchType == TRIBUTE_MATCH_TYPE_COMPETITIVE then
@@ -508,7 +545,7 @@ local function OnGameFlowStateChange( _, flowState )
   elseif flowState == TRIBUTE_GAME_FLOW_STATE_GAME_OVER then
 
     ETE.matchDataGui.win:SetHidden(true)
-    ETE.EM:UnregisterForUpdate(ETE.name.."Update")
+    EM:UnregisterForUpdate(ETE.name.."Update")
 
     matchData.matchDuration = GetGameTimeMilliseconds() - matchData.matchStart --TODO new or old?
     PostMatchProcess()
@@ -517,7 +554,7 @@ local function OnGameFlowStateChange( _, flowState )
 
     -- Unregister all Updates
     for update, _ in pairs( FEATURES.update) do
-      ETE.EM:UnregisterForUpdate(ETE.name.."Update"..update)
+      EM:UnregisterForUpdate(ETE.name.."Update"..update)
     end
     FEATURES.update = {}
 
@@ -593,14 +630,10 @@ local function OnActivityFinderStatusUpdate(_, finderStatus)
 end
 
 
+--[[ -------------------- ]]
+--[[ -- initialization -- ]]
+--[[ -------------------- ]]
 
-
-
-----------------
--- Initialize --
-----------------
-
---local functions for initialization
 local function ValidateCharacterInfo(store, player)
   if not store[player.charId] then return end
   store[player.charId].name = player.charName
@@ -681,24 +714,16 @@ local function Initialize()
 
 
 
-  ETE.EM:RegisterForEvent(ETE.name.."PlayerTurnStart", EVENT_TRIBUTE_PLAYER_TURN_STARTED, OnPlayerTurnStart)
-  ETE.EM:RegisterForEvent(ETE.name.."FlowStateChange", EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE, OnGameFlowStateChange)
+  EM:RegisterForEvent(ETE.name.."PlayerTurnStart", EVENT_TRIBUTE_PLAYER_TURN_STARTED, OnPlayerTurnStart)
+  EM:RegisterForEvent(ETE.name.."FlowStateChange", EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE, OnGameFlowStateChange)
+  EM:RegisterForEvent(ETE.name.."ActivityFinterStatus", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, OnActivityFinderStatusUpdate)
 
-  ETE.EM:RegisterForEvent(ETE.name.."ActivityFinterStatus", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, OnActivityFinderStatusUpdate)
+  ZO_PostHook("AcceptLFGReadyCheckNotification", function() MATCH_PENDING = false end)
+  ZO_PostHook("DeclineLFGReadyCheckNotification", function() MATCH_PENDING = false end)
 
   ETE.CreateMenu()
-
-  ZO_PostHook("AcceptLFGReadyCheckNotification", function()
-    MATCH_PENDING = false
-  end)
-
-  ZO_PostHook("DeclineLFGReadyCheckNotification", function()
-    MATCH_PENDING = false
-  end)
-
-
-
 end
+
 
 ZO_CreateStringId("SI_BINDING_NAME_ETE_TOGGLE_STATS_WINDOW", "Toggle Stats Window")
 
@@ -706,17 +731,11 @@ ZO_CreateStringId("SI_BINDING_NAME_ETE_TOGGLE_STATS_WINDOW", "Toggle Stats Windo
 local function OnAddonLoaded(_, addonName)
   if addonName == ETE.name then
     Initialize()
-    ETE.EM:UnregisterForEvent(ETE.name, EVENT_ADD_ON_LOADED)
+    EM:UnregisterForEvent(ETE.name, EVENT_ADD_ON_LOADED)
   end
 end
 
-ETE.EM:RegisterForEvent(ETE.name, EVENT_ADD_ON_LOADED, OnAddonLoaded)
+EM:RegisterForEvent(ETE.name, EVENT_ADD_ON_LOADED, OnAddonLoaded)
 
 
-function ETE.TogglePositionFix()
-  local setting = ETE.store.fixed
-  if setting then ETE.UnlockGui() else ETE.LockGui() end
-  ETE.store.fixed = not setting
-end
 
-SLASH_COMMANDS["/hourglass"] = ETE.TogglePositionFix
