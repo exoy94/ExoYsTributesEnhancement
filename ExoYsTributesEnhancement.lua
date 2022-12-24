@@ -173,25 +173,26 @@ h5. TributeGameFlowState
 -- variables --
 ---------------
 
-
-EM = GetEventManager()
 ETE.WM = GetWindowManager()
 
 
 
 --[[ --------------- ]]
---[[ -- variables -- ]]
+--[[ -- Variables -- ]]
 --[[ --------------- ]]
 
-ETE.name = "ExoYsTributesEnhancement"
+ETE = {
+  ['name'] =  "ExoYsTributesEnhancement",
+  ['lfgPending'] = false, 
+}
+
 local EM = GetEventManager() 
-local FLOW_STATE = 0
-local MATCH_PENDING = false 
+
 local FEATURES = { update = {} }
 local IGNORE_NOTE = "TributesEnhancement Temporary Ignore"
 
 --[[ ---------------------- ]]
---[[ -- custom constants -- ]]
+--[[ -- Custom Constants -- ]]
 --[[ ---------------------- ]]
 
 local OUTCOME_UNKOWN = 0
@@ -201,7 +202,7 @@ local OUTCOME_OMITTED = 3
 
 
 --[[ ------------------- ]]
---[[ -- lookup tables -- ]]
+--[[ -- Lookup Tables -- ]]
 --[[ ------------------- ]]
 
 local matchTypeOrder = {
@@ -256,7 +257,7 @@ end
 SLASH_COMMANDS["/hourglass"] = ETE.TogglePositionFix
 
 --[[ --------------- ]]
---[[ -- utilities -- ]]
+--[[ -- Utilities -- ]]
 --[[ --------------- ]]
 
 local function IsPlayerTurn()
@@ -265,7 +266,7 @@ end
 
 
 --[[ ---------------- ]]
---[[ -- match data -- ]]
+--[[ -- Match Data -- ]]
 --[[ ---------------- ]]
 
 local matchData = {}
@@ -414,10 +415,6 @@ local function VictoryDefeatStatsTableStructure()
   return tableStructure
 end
 
-local function AddVictoryAndDefeatStatsTables() --compatibility with SV earlier than 1.2
-
-end
-
 
 local function CreateCharStatistics(charId)
   ETE.store.statistics.character[charId] = {
@@ -438,6 +435,7 @@ local function AddVictoryAndDefeatStatsTables(charId) --compatibility with SV ea
     ETE.store.statistics.character[charId].victory = VictoryDefeatStatsTableStructure()
     ETE.store.statistics.character[charId].defeat = VictoryDefeatStatsTableStructure()
 end
+
 
 local function PostMatchProcess( )
 
@@ -503,9 +501,9 @@ local function OnUpdateTurnTimeGui()
 end
 
 
----------------------
--- Event Callbacks --
----------------------
+--[[ --------------------- ]]
+--[[ -- Event Callbacks -- ]]
+--[[ --------------------- ]]
 
 --TODO WARNING Gamepad mode (GAMEPAD_CHAT)
 local function MaximizeChat()
@@ -519,15 +517,12 @@ end
 
 
 local function OnGameFlowStateChange( _, flowState )
-  FLOW_STATE = flowState
+  ETE.flowState = flowState
   if flowState == TRIBUTE_GAME_FLOW_STATE_INTRO then
     InitializeMatchData()
     defaultPlayerStatus = GetPlayerStatus()
     CreateSafeEnvironment()
   elseif flowState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
-    --if ETE.store.automation.maxChatAtGameStart then
-    --  MaximizeChat()
-    --end
 
     matchData.turnStart = GetGameTimeMilliseconds()
     matchData.perspective = GetActiveTributePlayerPerspective()
@@ -606,7 +601,8 @@ local function LFG_ReadyCheck( lfgActivity )
 
     if not tributeActivity[lfgActivity] then return end
 
-    MATCH_PENDING = true
+    
+    ETE.lfgPending = true
 
     Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"ToT Match found", tributeActivity[lfgActivity]}, {" (",")"} )
 
@@ -621,9 +617,9 @@ end
 local function OnActivityFinderStatusUpdate(_, finderStatus)
 
   if finderStatus == ACTIVITY_FINDER_STATUS_NONE then
-    MATCH_PENDING = false
+    ETE.lfgPending = false
   elseif finderStatus == ACTIVITY_FINDER_STATUS_READY_CHECK then
-    if MATCH_PENDING then return end
+    if ETE.lfgPending then return end
     LFG_ReadyCheck( GetLFGReadyCheckActivityType() )
   end
 
@@ -631,7 +627,7 @@ end
 
 
 --[[ -------------------- ]]
---[[ -- initialization -- ]]
+--[[ -- Initialization -- ]]
 --[[ -------------------- ]]
 
 local function ValidateCharacterInfo(store, player)
@@ -718,8 +714,8 @@ local function Initialize()
   EM:RegisterForEvent(ETE.name.."FlowStateChange", EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE, OnGameFlowStateChange)
   EM:RegisterForEvent(ETE.name.."ActivityFinterStatus", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, OnActivityFinderStatusUpdate)
 
-  ZO_PostHook("AcceptLFGReadyCheckNotification", function() MATCH_PENDING = false end)
-  ZO_PostHook("DeclineLFGReadyCheckNotification", function() MATCH_PENDING = false end)
+  ZO_PostHook("AcceptLFGReadyCheckNotification", function() ETE.lfgPending = false end)
+  ZO_PostHook("DeclineLFGReadyCheckNotification", function() ETE.lfgPending = false end)
 
   ETE.CreateMenu()
 end
