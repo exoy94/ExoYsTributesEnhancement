@@ -167,7 +167,7 @@ function ETE.CreateMenu()
     name                = displayName,
     displayName         = displayName,
     author              = "@|c00FF00ExoY|r94 (PC/EU)",
-    version             = "1.4.0",
+    version             = "1.5.0",
     registerForRefresh  = true,
   }
   local optionsTable = {}
