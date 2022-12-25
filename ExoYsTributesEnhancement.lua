@@ -186,6 +186,8 @@ ETE = {
   ['lfgPending'] = false, 
 }
 
+ZO_CreateStringId("SI_BINDING_NAME_ETE_TOGGLE_STATS_WINDOW", "Toggle Stats Window")
+
 local EM = GetEventManager() 
 
 local FEATURES = { update = {} }
@@ -404,37 +406,6 @@ function ETE.OnUpdate()
 end
 
 
-local function VictoryDefeatStatsTableStructure()
-  local tableStructure = {}
-  for i = 1,4 do
-    tableStructure[i] = {}
-    for j = 1,6 do
-      tableStructure[i][j-1] = 0
-    end
-  end
-  return tableStructure
-end
-
-
-local function CreateCharStatistics(charId)
-  ETE.store.statistics.character[charId] = {
-    name = GetUnitName("player"),
-    server = GetWorldName(),
-    games = {
-      [TRIBUTE_MATCH_TYPE_CASUAL] = {time = 0, played = 0, won = 0},
-      [TRIBUTE_MATCH_TYPE_CLIENT] = {time = 0, played = 0, won = 0},
-      [TRIBUTE_MATCH_TYPE_COMPETITIVE] = {time = 0, played = 0, won = 0},
-      [TRIBUTE_MATCH_TYPE_PRIVATE] = {time = 0, played = 0, won = 0},
-    },
-    victory = VictoryDefeatStatsTableStructure(),
-    defeat = VictoryDefeatStatsTableStructure(),
-  }
-end
-
-local function AddVictoryAndDefeatStatsTables(charId) --compatibility with SV earlier than 1.2
-    ETE.store.statistics.character[charId].victory = VictoryDefeatStatsTableStructure()
-    ETE.store.statistics.character[charId].defeat = VictoryDefeatStatsTableStructure()
-end
 
 
 local function PostMatchProcess( )
@@ -630,15 +601,6 @@ end
 --[[ -- Initialization -- ]]
 --[[ -------------------- ]]
 
-local function ValidateCharacterInfo(store, player)
-  if not store[player.charId] then return end
-  store[player.charId].name = player.charName
-
-  if not store[player.charId].server then
-      store[player.charId].server = GetWorldName()
-  end
-end
-
 
 local function GetDefaults()
   local widthRoot, heightRoot = GuiRoot:GetDimensions()
@@ -688,27 +650,62 @@ end
 
 
 
+local function VictoryDefeatStatsTableStructure()
+  local tableStructure = {}
+  for i = 1,4 do
+    tableStructure[i] = {}
+    for j = 1,6 do
+      tableStructure[i][j-1] = 0
+    end
+  end
+  return tableStructure
+end
+
+
+local function CreateCharStatistics(charId)
+  ETE.store.statistics.character[charId] = {
+    name = GetUnitName("player"),
+    server = GetWorldName(),
+    games = {
+      [TRIBUTE_MATCH_TYPE_CASUAL] = {time = 0, played = 0, won = 0},
+      [TRIBUTE_MATCH_TYPE_CLIENT] = {time = 0, played = 0, won = 0},
+      [TRIBUTE_MATCH_TYPE_COMPETITIVE] = {time = 0, played = 0, won = 0},
+      [TRIBUTE_MATCH_TYPE_PRIVATE] = {time = 0, played = 0, won = 0},
+    },
+    victory = VictoryDefeatStatsTableStructure(),
+    defeat = VictoryDefeatStatsTableStructure(),
+  }
+end
+
+local function AddVictoryAndDefeatStatsTables(charId) --compatibility with SV earlier than 1.2
+    ETE.store.statistics.character[charId].victory = VictoryDefeatStatsTableStructure()
+    ETE.store.statistics.character[charId].defeat = VictoryDefeatStatsTableStructure()
+end
+
+
+
+
+
+
 local function Initialize()
 
   ETE.store = ZO_SavedVars:NewAccountWide("ETESV", 1, nil, GetDefaults() )
 
-  ETE.player = {
-    ["charName"] = GetUnitName("player"),
-    ["charId"] = GetCurrentCharacterId(),
-  }
+  ETE.charId = GetCurrentCharacterId() 
 
-  ValidateCharacterInfo(ETE.store.statistics.character, ETE.player)
+  local characterStore = store.statistics.character[ETE.charId] 
+  if characterStore then --TODO check
+    characterStore.name = GetUnitName("player") -- handle potential name change
+  else 
+    CreateCharStatistics(ETE.charId)
+  end
 
   ETE.InitializeTurnTimeGui()
 
   ETE.matchDataGui = ETE.CreateMatchDataGui()
   ETE.ApplyMatchDataDesign()
 
-  --ETE.statsGui = ETE.CreateStatsGui()
-  --ETE.UpdateStatsGui()
   ETE.InitializeStatsGui()
-
-
 
   EM:RegisterForEvent(ETE.name.."PlayerTurnStart", EVENT_TRIBUTE_PLAYER_TURN_STARTED, OnPlayerTurnStart)
   EM:RegisterForEvent(ETE.name.."FlowStateChange", EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE, OnGameFlowStateChange)
@@ -719,9 +716,6 @@ local function Initialize()
 
   ETE.CreateMenu()
 end
-
-
-ZO_CreateStringId("SI_BINDING_NAME_ETE_TOGGLE_STATS_WINDOW", "Toggle Stats Window")
 
 
 local function OnAddonLoaded(_, addonName)
