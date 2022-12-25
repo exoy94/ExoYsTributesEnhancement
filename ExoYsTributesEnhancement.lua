@@ -190,8 +190,6 @@ ZO_CreateStringId("SI_BINDING_NAME_ETE_TOGGLE_STATS_WINDOW", "Toggle Stats Windo
 
 local EM = GetEventManager() 
 
-local FEATURES = { update = {} }
-
 --[[ ---------------------- ]]
 --[[ -- Custom Constants -- ]]
 --[[ ---------------------- ]]
@@ -395,12 +393,10 @@ local function DecideTurnTimeGuiVisibility( setValue )
   if overwrite then show = setValue end
   Lib.DebugMsg( ETE.store.dev, "ETE", {"DecideTurnTimeGuiVisibility", tostring(show), overwrite and " (overwrite)" or ""}, {": "} )
   ETE.SetTurnTimeGuiVisibility( show )
-  FEATURES.turnTimeGuiVisible = show
 end
 
 local function OnUpdateTurnTimeGui()
-  if not FEATURES.turnTimeGuiVisible then return end
-
+  
   local timeRemaining = GetTributeRemainingTimeForTurn()
   local output = timeRemaining and Lib.GetCountdownString( timeRemaining, true, true ) or "∞"
 
@@ -507,7 +503,6 @@ local function LFG_ReadyCheck( lfgActivity )
       zo_callLater(function() AcceptLFGReadyCheckNotification() end, ETE.store.automation["delay"]*1000)
     end
 
-    --  zo_removeCallLater( callbackId )
 end
 
 local function OnActivityFinderStatusUpdate(_, finderStatus)
