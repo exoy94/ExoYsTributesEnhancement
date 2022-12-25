@@ -202,7 +202,6 @@ local OUTCOME_VICTORY = 1
 local OUTCOME_DEFEAT = 2
 local OUTCOME_OMITTED = 3
 
-
 --[[ ------------------- ]]
 --[[ -- Lookup Tables -- ]]
 --[[ ------------------- ]]
@@ -640,45 +639,31 @@ local function GetDefaults()
 end
 
 
-
-local function VictoryDefeatStatsTableStructure()
-  local tableStructure = {}
-  for i = 1,4 do
-    tableStructure[i] = {}
-    for j = 1,6 do
-      tableStructure[i][j-1] = 0
-    end
-  end
-  return tableStructure
-end
-
-
 --TODO change, that function provides table and not directly write in sv
 local function CreateCharStatistics(charId)
-  ETE.store.statistics.character[charId] = {
+  local t_outcome = {}
+  for i = 1,4 do --match type
+    t_outcome[i] = {}
+    for j = 1,6 do --victory type
+      t_outcome[i][j-1] = 0
+    end
+  end
+  
+  local t_match = {time = 0, player = 0, won = 0}
+
+  return {
     name = GetUnitName("player"),
     server = GetWorldName(),
     games = {
-      [TRIBUTE_MATCH_TYPE_CASUAL] = {time = 0, played = 0, won = 0},
-      [TRIBUTE_MATCH_TYPE_CLIENT] = {time = 0, played = 0, won = 0},
-      [TRIBUTE_MATCH_TYPE_COMPETITIVE] = {time = 0, played = 0, won = 0},
-      [TRIBUTE_MATCH_TYPE_PRIVATE] = {time = 0, played = 0, won = 0},
+      [TRIBUTE_MATCH_TYPE_CASUAL] = t_match,
+      [TRIBUTE_MATCH_TYPE_CLIENT] = t_match,
+      [TRIBUTE_MATCH_TYPE_COMPETITIVE] = t_match,
+      [TRIBUTE_MATCH_TYPE_PRIVATE] = t_match,
     },
-    victory = VictoryDefeatStatsTableStructure(),
-    defeat = VictoryDefeatStatsTableStructure(),
-  }
+    victory = t_outcome,
+    defeat = t_outcome,
+  } --TODO check if "shallowCopy" is necessary
 end
-
-
---TODO Remove
-local function AddVictoryAndDefeatStatsTables(charId) --compatibility with SV earlier than 1.2
-    ETE.store.statistics.character[charId].victory = VictoryDefeatStatsTableStructure()
-    ETE.store.statistics.character[charId].defeat = VictoryDefeatStatsTableStructure()
-end
-
-
-
-
 
 
 local function Initialize()
