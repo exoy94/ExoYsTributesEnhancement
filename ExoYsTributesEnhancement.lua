@@ -238,14 +238,7 @@ function ETE.GetOutcomeDesignation( outcome )
   return outcomeDesignation[outcome]
 end
 
-
---TODO Move function 
-local function RegisterUpdate(id, callback, interval )
-  if not interval then interval = 100 end
-  EM:RegisterForUpdate(ETE.name.."Update"..id, interval, callback)
-  FEATURES.update[id] = true
-end
-
+--TODO move to menu
 function ETE.TogglePositionFix()
   local setting = ETE.store.fixed
   if setting then ETE.UnlockGui() else ETE.LockGui() end
@@ -441,30 +434,25 @@ local function OnGameFlowStateChange( _, flowState )
     matchData.perspective = GetActiveTributePlayerPerspective()
 
     EM:RegisterForUpdate(ETE.name.."Update", 100, ETE.OnUpdate)
+
     ETE.matchDataGui.win:SetHidden(false)
 
     if matchData.matchType == TRIBUTE_MATCH_TYPE_CASUAL or matchData.matchType == TRIBUTE_MATCH_TYPE_COMPETITIVE then
       if ETE.store.turnTime.enabled then
         DecideTurnTimeGuiVisibility()
-        RegisterUpdate("TurnTime", OnUpdateTurnTimeGui )
       end
     end
 
   elseif flowState == TRIBUTE_GAME_FLOW_STATE_GAME_OVER then
+    EM:UnregisterForUpdate(ETE.name.."Update")
 
     ETE.matchDataGui.win:SetHidden(true)
-    EM:UnregisterForUpdate(ETE.name.."Update")
+    
 
     matchData.matchDuration = GetGameTimeMilliseconds() - matchData.matchStart --TODO new or old?
     PostMatchProcess()
 
     DecideTurnTimeGuiVisibility(false)
-
-    -- Unregister all Updates
-    for update, _ in pairs( FEATURES.update) do
-      EM:UnregisterForUpdate(ETE.name.."Update"..update)
-    end
-    FEATURES.update = {}
 
   elseif flowState == TRIBUTE_GAME_FLOW_STATE_INACTIVE then
     ClearMatchData()
@@ -484,10 +472,6 @@ local function OnPlayerTurnStart(_, isPlayer)
 
   matchData.perspective = isPlayer and TRIBUTE_PLAYER_PERSPECTIVE_SELF or TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT
   matchData.turnStart = currentTime
-
-  if FEATURES.update["TurnTime"] then
-    DecideTurnTimeGuiVisibility()
-  end
 
   -- chat automation
   --[[if isPlayer then
