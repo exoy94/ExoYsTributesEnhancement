@@ -306,57 +306,30 @@ local function ClearMatchData()
 end
 
 
-----------------
--- Safe Space --
-----------------
-
-local SafeSpace = { }
-local Automation = { }
-
---[[function SafeSpace.AddIgnore( displayName )
-  -- TODO Menu Setting
-  if IsFriend(displayName) then
-    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {displayName, " is friend"} )
-    return
-  end
-  if IsIgnored(displayName) then
-    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {displayName, " is already igored"} )
-    return end
-  AddIgnore(displayName)
-  Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {displayName, " added to ignore list"} )
-  for i=1,GetNumIgnored()  do
-    local name,_ = GetIgnoredInfo()
-    if name == displayName then
-      SetIgnoreNote(i, IGNORE_NOTE)
-      Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Ignore note set for ", displayName} )
-    end
-  end
-end
-
-local function RemoveTemporaryIgnoreEntries( )
-  local removeList = {}
-  -- check everybody on ingame ignore list for a specific note and remember the names
-  for i=1,GetNumIgnored() do
-    local name, note = GetIgnoredInfo(i)
-    if note == IGNORE_NOTE then
-      table.insert(removeList, name)
-    end
-  end
-  -- remove everybody from ingame ignore list identified by previous loop
-  for _, name in pairs(removeList) do
-    RemoveIgnore(name)
-    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {displayName, " removed from ignore  list"} )
-  end
-
-end]]
+--[[ ---------------- ]]
+--[[ -- Automation -- ]]
+--[[ ---------------- ]]
 
 -- player online status
 
 local defaultPlayerStatus = PLAYER_STATUS_ONLINE
 
+local function AdjustPlayerStatus() 
+  if not IsMatchDataInitialized() then return end 
 
+  local store = ETE.store.automation
+  local matchType = matchData.matchType
 
+  if store.changePlayerStatus[matchType].enabled then
+    SelectPlayerStatus( store.changePlayerStatus[matchType].status )
+    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", store.changePlayerStatus[matchType].status}, {" (", ")"} )
+  end
+end
 
+local function RevertPlayerStatus() 
+  SelectPlayerStatus( defaultPlayerStatus )
+  Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", defaultPlayerStatus}, {" (", ")"} )
+end
 
 local function CreateSafeEnvironment()
   if not IsMatchDataInitialized() then return end
@@ -370,13 +343,6 @@ local function CreateSafeEnvironment()
     Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", store.changePlayerStatus[matchType].status}, {" (", ")"} )
   end
 
-end
-
-
-local function RevertSafeEnvironmentChanges()
-  SelectPlayerStatus( defaultPlayerStatus )
-  Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", defaultPlayerStatus}, {" (", ")"} )
-  --RemoveTemporaryIgnoreEntries( )
 end
 
 ----
@@ -482,7 +448,7 @@ local function OnGameFlowStateChange( _, flowState )
   if flowState == TRIBUTE_GAME_FLOW_STATE_INTRO then
     InitializeMatchData()
     defaultPlayerStatus = GetPlayerStatus()
-    CreateSafeEnvironment()
+    AdjustPlayerStatus()
   elseif flowState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
 
     matchData.turnStart = GetGameTimeMilliseconds()
@@ -516,7 +482,7 @@ local function OnGameFlowStateChange( _, flowState )
 
   elseif flowState == TRIBUTE_GAME_FLOW_STATE_INACTIVE then
     ClearMatchData()
-    RevertSafeEnvironmentChanges()
+    RevertPlayerStatus()
   end
 end
 
@@ -562,7 +528,6 @@ local function LFG_ReadyCheck( lfgActivity )
 
     if not tributeActivity[lfgActivity] then return end
 
-    
     ETE.lfgPending = true
 
     Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"ToT Match found", tributeActivity[lfgActivity]}, {" (",")"} )
@@ -587,10 +552,10 @@ local function OnActivityFinderStatusUpdate(_, finderStatus)
 end
 
 
+
 --[[ -------------------- ]]
 --[[ -- Initialization -- ]]
 --[[ -------------------- ]]
-
 
 local function GetDefaults()
   local widthRoot, heightRoot = GuiRoot:GetDimensions()
