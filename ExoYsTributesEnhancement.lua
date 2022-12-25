@@ -417,20 +417,11 @@ local function PostMatchProcess( )
 
   matchData.outcome = victory and OUTCOME_VICTORY or OUTCOME_DEFEAT
 
-  local charId = GetCurrentCharacterId()
-  if not ETE.store.statistics.character[charId] then
-    CreateCharStatistics(charId)
-  end
-
-  if not ETE.store.statistics.character[charId].victory then
-    AddVictoryAndDefeatStatsTables(charId)
-  end
-
   Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"PostProcess", "MatchType", ETE.GetMatchTypeName( matchData.matchType )}, {" - ", " (", ")"} )
   Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"PostProcess", "Outcome", ETE.GetOutcomeDesignation( matchData.outcome ) }, {" - ", " (", ")"} )
 
   -- record match data
-  local store = ETE.store.statistics.character[charId]
+  local store = ETE.store.statistics.character[ ETE.charId ]
   store.games[matchData.matchType].played = store.games[matchData.matchType].played + 1
   if victory then
     store.games[matchData.matchType].won = store.games[matchData.matchType].won + 1
@@ -662,6 +653,7 @@ local function VictoryDefeatStatsTableStructure()
 end
 
 
+--TODO change, that function provides table and not directly write in sv
 local function CreateCharStatistics(charId)
   ETE.store.statistics.character[charId] = {
     name = GetUnitName("player"),
@@ -677,6 +669,8 @@ local function CreateCharStatistics(charId)
   }
 end
 
+
+--TODO Remove
 local function AddVictoryAndDefeatStatsTables(charId) --compatibility with SV earlier than 1.2
     ETE.store.statistics.character[charId].victory = VictoryDefeatStatsTableStructure()
     ETE.store.statistics.character[charId].defeat = VictoryDefeatStatsTableStructure()
