@@ -639,8 +639,8 @@ local function GetDefaults()
 end
 
 
---TODO change, that function provides table and not directly write in sv
-local function CreateCharStatistics(charId)
+local function CreateCharStatistics()
+  local t_match = {time = 0, player = 0, won = 0}
   local t_outcome = {}
   for i = 1,4 do --match type
     t_outcome[i] = {}
@@ -648,8 +648,6 @@ local function CreateCharStatistics(charId)
       t_outcome[i][j-1] = 0
     end
   end
-  
-  local t_match = {time = 0, player = 0, won = 0}
 
   return {
     name = GetUnitName("player"),
@@ -676,7 +674,7 @@ local function Initialize()
   if characterStore then --TODO check
     characterStore.name = GetUnitName("player") -- handle potential name change
   else 
-    CreateCharStatistics(ETE.charId)
+    characterStore = CreateCharStatistics()
   end
 
   ETE.InitializeTurnTimeGui()
