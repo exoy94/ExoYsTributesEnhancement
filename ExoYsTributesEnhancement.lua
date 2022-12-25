@@ -191,7 +191,6 @@ ZO_CreateStringId("SI_BINDING_NAME_ETE_TOGGLE_STATS_WINDOW", "Toggle Stats Windo
 local EM = GetEventManager() 
 
 local FEATURES = { update = {} }
-local IGNORE_NOTE = "TributesEnhancement Temporary Ignore"
 
 --[[ ---------------------- ]]
 --[[ -- Custom Constants -- ]]
@@ -238,8 +237,6 @@ local outcomeDesignation = {
 function ETE.GetOutcomeDesignation( outcome )
   return outcomeDesignation[outcome]
 end
-
-
 
 
 --TODO Move function 
@@ -312,10 +309,13 @@ end
 
 -- player online status
 
-local defaultPlayerStatus = PLAYER_STATUS_ONLINE
-
+--TODO add change function in gui 
+--TODO add option to safe setting for the current match type 
+--TODO add option to keep new status for after match 
 local function AdjustPlayerStatus() 
   if not IsMatchDataInitialized() then return end 
+
+  ETE.worldPlayerStatus = GetPlayerStatus() 
 
   local store = ETE.store.automation
   local matchType = matchData.matchType
@@ -327,22 +327,9 @@ local function AdjustPlayerStatus()
 end
 
 local function RevertPlayerStatus() 
-  SelectPlayerStatus( defaultPlayerStatus )
-  Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", defaultPlayerStatus}, {" (", ")"} )
-end
-
-local function CreateSafeEnvironment()
-  if not IsMatchDataInitialized() then return end
-
-  -- player Status
-  local store = ETE.store.automation
-  local matchType = matchData.matchType
-
-  if store.changePlayerStatus[matchType].enabled then
-    SelectPlayerStatus( store.changePlayerStatus[matchType].status )
-    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", store.changePlayerStatus[matchType].status}, {" (", ")"} )
-  end
-
+  SelectPlayerStatus( ETE.worldPlayerStatus )
+  Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", ETE.worldPlayerStatus}, {" (", ")"} )
+  ETE.worldPlayerStatus = nil 
 end
 
 ----
@@ -447,7 +434,6 @@ local function OnGameFlowStateChange( _, flowState )
   ETE.flowState = flowState
   if flowState == TRIBUTE_GAME_FLOW_STATE_INTRO then
     InitializeMatchData()
-    defaultPlayerStatus = GetPlayerStatus()
     AdjustPlayerStatus()
   elseif flowState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
 
