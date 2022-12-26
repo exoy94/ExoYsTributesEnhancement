@@ -621,6 +621,9 @@ local function Initialize()
   ZO_PostHook("AcceptLFGReadyCheckNotification", function() ETE.lfgPending = false end)
   ZO_PostHook("DeclineLFGReadyCheckNotification", function() ETE.lfgPending = false end)
 
+  ETE.MatchGui = ETE.InitializeMatchGui() 
+  ETE.InitializeMatchGui = nil
+
   ETE.CreateMenu()
 end
 
