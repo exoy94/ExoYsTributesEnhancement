@@ -72,3 +72,11 @@ local function CreateMatchGui()
     back:SetAnchor( TOP, ctrl, TOP )
 
 end
+
+
+local function Initialize() 
+    CreateMatchGui() 
+    return MatchGui
+end
+
+ETE.InitializeMatchGui = Initialize
