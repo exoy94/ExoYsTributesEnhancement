@@ -13,6 +13,8 @@ languages/$(language).lua
 
 bindings.xml
 
+modules/MatchGui.lua
+
 ExoYsTributesEnhancementGui.lua
 ExoYsTributesEnhancementMenu.lua
 ExoYsTributesEnhancement.lua
