@@ -26,6 +26,11 @@ local function CreateMatchGui()
 
     local buttonH = WM:CreateControl( name.."ButtonHeader", ctrlH, CT_CONTROL)
 
+    buttonH:SetHandler("OnMouseEnter", function() 
+        InitializeTooltip(InformationTooltip, buttonH, RIGHT) end)
+        InformationTooltip:AddLine( "Tributes Enhancement Toggle")
+    end) 
+    buttonH:SetHandler("OnMouseExit", function() ZO_Tooltips_HideTextTooltip end)
     buttonH:SetHandler("OnClicked", function() MatchGui.Toggle() end )
 
     -- match gui 
