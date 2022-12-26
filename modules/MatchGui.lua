@@ -80,12 +80,30 @@ local function CreateMatchGui()
         + button sound on/off? 
         + lock/unlock button 
         
+        + statsbutton 
+
         + player status toggle 
         + chat opponent toggle? 
         + turn time gui 
         + ui background for warning
         + screen background for warning 
-        + igno opponent   
+        + igno opponent
+        
+        Layout: 
+        + left match type 
+        + right current time 
+        + middle toggle button 
+        + below smaller buttons 
+        + middle turn time 
+        + left you with right click for online status 
+        + right "them" with right click for chat, igno 
+        + below: percentage of play time + total match time 
+
+        + options extend to left/right depending on position 
+        + tournament extra extents to top/bottom, depending on position 
+
+
+
    ]]
 
     -- Settings 
