@@ -16,6 +16,15 @@ local function CreateMatchGui()
 
     winH:ClearAnchors() 
     winH:SetAnchor( TOPLEFT GuiRoot, TOPLEFT, store.position.x, store.position.y )
+    winH:SetHidden(true) 
+
+    MatchGui.ToggleHeader = function(state) 
+            if state == nil then 
+                state = winH:IsHidden()
+            end
+            winH:SetHidden(not state) 
+            winH:SetMouseEnabled(state)
+        end
 
     winH:SetHandler( "OnMoveStop", function() 
         store.position.x = win:GetLeft()
@@ -23,6 +32,8 @@ local function CreateMatchGui()
     end)
 
     local ctrlH = WM:CreateControl( name.."ControlHeader", winH, CT_CONTROL) 
+    ctrlH:ClearAnchors() 
+    ctrlH:SetAnchor( TOP, winH, TOP)
 
     local buttonH = WM:CreateControl( name.."ButtonHeader", ctrlH, CT_CONTROL)
     buttonH:ClearAnchors() 
@@ -32,9 +43,9 @@ local function CreateMatchGui()
     buttonH:SetNormalTexture(buttonH_texture.."_up.dds") 
     buttonH:SetMouseOverTexture(buttonH_texture.."_over.dds")  
     buttonH:SetHandler("OnMouseEnter", function() 
-        InitializeTooltip(InformationTooltip, buttonH, RIGHT) end)
-        InformationTooltip:AddLine( "Tributes Enhancement Toggle")
-    end) 
+            InitializeTooltip(InformationTooltip, buttonH, RIGHT) end)
+            InformationTooltip:AddLine( "Tributes Enhancement Toggle")
+        end) 
     buttonH:SetHandler("OnMouseExit", function() ZO_Tooltips_HideTextTooltip end)
     buttonH:SetHandler("OnClicked", function() MatchGui.Toggle() end )
 
@@ -59,6 +70,5 @@ local function CreateMatchGui()
     local back = WM:CreateControl( name.."Backdrop", ctrl, CT_BACKDROP)
     back:ClearAnchors()
     back:SetAnchor( TOP, ctrl, TOP )
-
 
 end
