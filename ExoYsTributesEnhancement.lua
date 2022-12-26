@@ -631,7 +631,6 @@ local function OnAddonLoaded(_, addonName)
     EM:UnregisterForEvent(ETE.name, EVENT_ADD_ON_LOADED)
   end
 end
-
 EM:RegisterForEvent(ETE.name, EVENT_ADD_ON_LOADED, OnAddonLoaded)
 
 

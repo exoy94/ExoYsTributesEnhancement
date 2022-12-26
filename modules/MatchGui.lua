@@ -1,0 +1,54 @@
+TributesEnhancement = TributesEnhancement or {}
+
+local ETE = TributesEnhancement
+
+local MatchGui = {}
+
+local WM = GetEventManager() 
+
+local function CreateMatchGui() 
+
+    local name = ETE.name.."MatchGui"
+    local store = ETE.store.matchGui
+
+    -- header button  
+    local winH = WM:CreateTopLevelWindow( name.."WindowHeader")
+
+    winH:ClearAnchors() 
+    winH:SetAnchor( TOPLEFT GuiRoot, TOPLEFT, store.position.x, store.position.y )
+
+    winH:SetHandler( "OnMoveStop", function() 
+        store.position.x = win:GetLeft()
+        store.position.y = win:GetTop() 
+    end)
+
+    local ctrlH = WM:CreateControl( name.."ControlHeader", winH, CT_CONTROL) 
+
+    local buttonH = WM:CreateControl( name.."ButtonHeader", ctrlH, CT_CONTROL)
+
+    buttonH:SetHandler("OnClicked", function() MatchGui.Toggle() end )
+
+    -- match gui 
+
+    local win = WM:CreateTopLevelWindow( name.."Window" )
+    win:ClearAnchors() 
+    win:SetAnchor( TOP, winH, TOP, 0, 0)
+
+    MatchGui.Toggle = function(state) 
+        if state == nil then 
+            state = win:IsHidden()
+        end
+        win:SetHidden(not state) 
+        win:SetMouseEnabled(state)
+    end
+
+    local ctrl = WM:CreateControl( name.."Control", win, CT_CONTROL )
+    ctrl:ClearAnchors() 
+    ctrl:SetAnchor()
+
+    local back = WM:CreateControl( name.."Backdrop", ctrl, CT_BACKDROP)
+    back:ClearAnchors()
+    back:SetAnchor( TOP, ctrl, TOP )
+
+
+end
