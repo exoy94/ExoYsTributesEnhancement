@@ -71,6 +71,26 @@ local function CreateMatchGui()
     back:ClearAnchors()
     back:SetAnchor( TOP, ctrl, TOP )
 
+    
+    --TODO 
+    --[[ 
+        + button toggle day/night
+        + button toggle settings
+            --> slider for master sound, interface, music, thisAddon 
+        + button sound on/off? 
+        + lock/unlock button 
+        
+        + player status toggle 
+        + chat opponent toggle? 
+        + turn time gui 
+        + ui background for warning
+        + screen background for warning 
+        + igno opponent   
+   ]]
+
+    -- Settings 
+
+
 end
 
 
