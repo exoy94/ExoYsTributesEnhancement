@@ -25,7 +25,12 @@ local function CreateMatchGui()
     local ctrlH = WM:CreateControl( name.."ControlHeader", winH, CT_CONTROL) 
 
     local buttonH = WM:CreateControl( name.."ButtonHeader", ctrlH, CT_CONTROL)
-
+    buttonH:ClearAnchors() 
+    buttonH:SetAnchor(TOP, ctrlH, TOP, 0, 0)
+    buttonH:SetDimensions(48, 48)
+    local buttonH_texture = ""
+    buttonH:SetNormalTexture(buttonH_texture.."_up.dds") 
+    buttonH:SetMouseOverTexture(buttonH_texture.."_over.dds")  
     buttonH:SetHandler("OnMouseEnter", function() 
         InitializeTooltip(InformationTooltip, buttonH, RIGHT) end)
         InformationTooltip:AddLine( "Tributes Enhancement Toggle")
@@ -33,8 +38,8 @@ local function CreateMatchGui()
     buttonH:SetHandler("OnMouseExit", function() ZO_Tooltips_HideTextTooltip end)
     buttonH:SetHandler("OnClicked", function() MatchGui.Toggle() end )
 
-    -- match gui 
 
+    -- match gui 
     local win = WM:CreateTopLevelWindow( name.."Window" )
     win:ClearAnchors() 
     win:SetAnchor( TOP, winH, TOP, 0, 0)
