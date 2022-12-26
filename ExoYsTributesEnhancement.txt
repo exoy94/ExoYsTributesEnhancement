@@ -1,8 +1,8 @@
 ## Title: |c40FF00ExoY|rs Tributes Enhancement
 ## Author: @|c40FF00ExoY|r94 (PC/EU)
 ## Description: Adds some enhancement for the tales of tribute card games.
-## APIVersion: 101034
-## Version: 1.4.0
+## APIVersion: 101036
+## Version: 1.5.0
 ## SavedVariables: ETESV
 
 ## DependsOn: LibExoYsUtilities
