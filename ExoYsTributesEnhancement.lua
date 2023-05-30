@@ -644,20 +644,21 @@ end
 
 local function Initialize()
 
+
   ETE.store = ZO_SavedVars:NewAccountWide("ETESV", 1, nil, GetDefaults() )
 
   ETE.charId = GetCurrentCharacterId() 
 
-  local characterStore = store.statistics.character[ETE.charId] 
+  local characterStore = ETE.store.statistics.character[ETE.charId] 
   if characterStore then --TODO check
     characterStore.name = GetUnitName("player") -- handle potential name change
   else 
     characterStore = CreateCharStatistics()
   end
 
-  ETE.InitializeTurnTimeGui()
+  --ETE.InitializeTurnTimeGui() --TODO
 
-  ETE.matchDataGui = ETE.CreateMatchDataGui()
+  ETE.matchDataGui = ETE.InitializeMatchGui() -- ETE.CreateMatchDataGui()
   ETE.ApplyMatchDataDesign()
 
   ETE.InitializeStatsGui()

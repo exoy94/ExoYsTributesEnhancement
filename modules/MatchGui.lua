@@ -15,7 +15,7 @@ local function CreateMatchGui()
     local winH = WM:CreateTopLevelWindow( name.."WindowHeader")
 
     winH:ClearAnchors() 
-    winH:SetAnchor( TOPLEFT GuiRoot, TOPLEFT, store.position.x, store.position.y )
+    winH:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT, store.position.x, store.position.y )
     winH:SetHidden(true) 
 
     MatchGui.ToggleHeader = function(state) 
@@ -43,10 +43,10 @@ local function CreateMatchGui()
     buttonH:SetNormalTexture(buttonH_texture.."_up.dds") 
     buttonH:SetMouseOverTexture(buttonH_texture.."_over.dds")  
     buttonH:SetHandler("OnMouseEnter", function() 
-            InitializeTooltip(InformationTooltip, buttonH, RIGHT) end)
+            InitializeTooltip(InformationTooltip, buttonH, RIGHT)
             InformationTooltip:AddLine( "Tributes Enhancement Toggle")
         end) 
-    buttonH:SetHandler("OnMouseExit", function() ZO_Tooltips_HideTextTooltip end)
+    buttonH:SetHandler("OnMouseExit", function() ZO_Tooltips_HideTextTooltip() end)
     buttonH:SetHandler("OnClicked", function() MatchGui.Toggle() end )
 
 
