@@ -41,7 +41,8 @@ function ETE.InitializeTurnTimeGui()
 
   local function SetSize( size )
     store.size = size
-    label:SetFont( Lib.GetFont( size , "ProseAntique") )
+    --label:SetFont( Lib.GetFont( size , "ProseAntique") )
+    label:SetFont("EsoUI/Common/Fonts/ProseAntiquePSMT.otf|20|soft-shadow-thick" )
     local newWidth, newHeigth = label:GetDimensions()
     win:SetDimensions( newWidth, newHeigth )
     ctrl:SetDimensions( newWidth, newHeigth )

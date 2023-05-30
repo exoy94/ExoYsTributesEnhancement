@@ -40,7 +40,7 @@ local function GetTurnTimeMenu()
 
   return  {
     type = "submenu",
-    name = Lib.AddIconToString( "Turn Helper", "esoui/art/icons/achievement_els_soaring_timeflow.dds", 36, true),
+    name = Lib.AddIconToString( "Turn Helper", "esoui/art/icons/achievement_els_soaring_timeflow.dds", 36, "front"),
     controls = controls,
   }
 end
@@ -154,7 +154,7 @@ local function GetAutomationMenu()
 
   return  {
     type = "submenu",
-    name = Lib.AddIconToString( "Automation", "esoui/art/icons/store_orsiniumdlc_solopve.dds", 36, true),
+    name = Lib.AddIconToString( "Automation", "esoui/art/icons/store_orsiniumdlc_solopve.dds", 36, "front"),
     controls = controls,
   }
 end
@@ -172,12 +172,7 @@ function ETE.CreateMenu()
   }
   local optionsTable = {}
 
-  local feedbackData = {
-    addonName = "Tributes Enhancement",
-    esouiSuffix = "info3364-ExoYsTributesEnhancement.html",
-  }
-
-  table.insert(optionsTable, Lib.GetFeedbackSubmenu( feedbackData ) )
+  table.insert(optionsTable, Lib.FeedbackSubmenu("Tributes Enhancement","info3364-ExoYsTributesEnhancement.html"))
   table.insert(optionsTable, GetAutomationMenu() )
   table.insert(optionsTable, GetTurnTimeMenu() )
 
