@@ -326,7 +326,7 @@ local function CreateSafeEnvironment()
 
   if store.changePlayerStatus[matchType].enabled then
     SelectPlayerStatus( store.changePlayerStatus[matchType].status )
-    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", store.changePlayerStatus[matchType].status}, {" (", ")"} )
+    --Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", store.changePlayerStatus[matchType].status}, {" (", ")"} )
   end
 
   --
@@ -336,7 +336,7 @@ end
 
 local function RevertSafeEnvironmentChanges()
   SelectPlayerStatus( defaultPlayerStatus )
-  Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", defaultPlayerStatus}, {" (", ")"} )
+  --Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"Set Player Status", defaultPlayerStatus}, {" (", ")"} )
   --RemoveTemporaryIgnoreEntries( )
 end
 
@@ -420,8 +420,8 @@ local function PostMatchProcess( )
     AddVictoryAndDefeatStatsTables(charId)
   end
 
-  Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"PostProcess", "MatchType", ETE.GetMatchTypeName( matchData.matchType )}, {" - ", " (", ")"} )
-  Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"PostProcess", "Outcome", ETE.GetOutcomeDesignation( matchData.outcome ) }, {" - ", " (", ")"} )
+  --Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"PostProcess", "MatchType", ETE.GetMatchTypeName( matchData.matchType )}, {" - ", " (", ")"} )
+  --Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"PostProcess", "Outcome", ETE.GetOutcomeDesignation( matchData.outcome ) }, {" - ", " (", ")"} )
 
   -- record match data
   local store = ETE.store.statistics.character[charId]
@@ -451,7 +451,7 @@ local function DecideTurnTimeGuiVisibility( setValue )
 
   local overwrite = type(setValue) == "boolean"
   if overwrite then show = setValue end
-  Lib.DebugMsg( ETE.store.dev, "ETE", {"DecideTurnTimeGuiVisibility", tostring(show), overwrite and " (overwrite)" or ""}, {": "} )
+  --Lib.DebugMsg( ETE.store.dev, "ETE", {"DecideTurnTimeGuiVisibility", tostring(show), overwrite and " (overwrite)" or ""}, {": "} )
   ETE.SetTurnTimeGuiVisibility( show )
   FEATURES.turnTimeGuiVisible = show
 end
@@ -571,10 +571,10 @@ local function LFG_ReadyCheck( lfgActivity )
 
     MATCH_PENDING = true
 
-    Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"ToT Match found", tributeActivity[lfgActivity]}, {" (",")"} )
+    --Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", {"ToT Match found", tributeActivity[lfgActivity]}, {" (",")"} )
 
     if ETE.store.automation[lfgActivity] then
-      Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", zo_strformat("Autoaccept in <<1>>s", ETE.store.automation["delay"]) )
+      --Lib.DebugMsg( ETE.store.debug, "TributesEnhancement", zo_strformat("Autoaccept in <<1>>s", ETE.store.automation["delay"]) )
       zo_callLater(function() AcceptLFGReadyCheckNotification() end, ETE.store.automation["delay"]*1000)
     end
 
