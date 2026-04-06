@@ -125,7 +125,7 @@ end
 
 
 function ETE.SetTurnTimeGuiVisibility( show )
-  Lib.DebugMsg( ETE.store.dev, "ETE", {"SetTurnTimeGuiVisibility", tostring(show)}, {": "} )
+  --Lib.DebugMsg( ETE.store.dev, "ETE", {"SetTurnTimeGuiVisibility", tostring(show)}, {": "} )
   turnTimeGui.win:SetHidden( not show )
 
   -- show or hide buttons
